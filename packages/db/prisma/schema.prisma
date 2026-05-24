@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  resumes         Resume[]
+  mockInterviews  MockInterview[]
+  codingSessions  CodingSession[]
+  studyPlans      StudyPlan[]
+  analyticsEvents AnalyticsEvent[]
+}
+
+model Resume {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName    String
+  s3Key       String
+  status      ResumeStatus @default(PENDING)
+  analysisRaw Json?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([userId])
+}
+
+enum ResumeStatus {
+  PENDING
+  PROCESSING
+  COMPLETE
+  FAILED
+}
+
+model MockInterview {
+  id         String          @id @default(cuid())
+  userId     String
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company    String
+  role       String
+  difficulty Difficulty      @default(MEDIUM)
+  status     InterviewStatus @default(IN_PROGRESS)
+  score      Int?
+  messages   Json            @default("[]")
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@index([userId])
+}
+
+enum InterviewStatus {
+  IN_PROGRESS
+  COMPLETE
+  ABANDONED
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model CodingSession {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId String
+  language  String   @default("javascript")
+  code      String   @db.Text
+  passed    Boolean  @default(false)
+  timeTaken Int?
+  createdAt DateTime @default(now())
+
+  @@index([userId, problemId])
+  @@index([userId, createdAt])
+}
+
+model StudyPlan {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetCompany String
+  targetRole    String
+  timelineWeeks Int
+  planJson      Json
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventType String
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([userId, eventType])
+}
