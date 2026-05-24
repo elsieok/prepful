@@ -1,5 +1,5 @@
 import { Webhook } from 'svix';
-import { db } from 'db';
+import { db } from '@repo/db';
 
 interface ClerkUserCreatedEvent {
   type: string;
