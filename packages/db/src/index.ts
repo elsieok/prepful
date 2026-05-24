@@ -4,10 +4,15 @@ const globalForPrisma = globalThis as unknown as {
   prisma: InstanceType<typeof PrismaClient> | undefined;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const db =
   globalForPrisma.prisma ??
-  new (PrismaClient as any)();
+  new (PrismaClient as any)({
+    datasource: {
+      db: {
+        url: process.env.DATABASE_URL,
+      },
+    },
+  });
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = db;
