@@ -16,7 +16,10 @@
     "ioredis": "^5.0.0",
     "lib": "*",
     "openai": "^4.0.0",
-    "pdf-parse": "^1.1.1"
+    "pdf-parse": "^1.1.1",
+    "socket.io": "^4.8.3",
+    "y-websocket": "^3.0.0",
+    "yjs": "^13.6.31"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
