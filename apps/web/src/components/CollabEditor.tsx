@@ -1,5 +1,6 @@
 'use client';
-import Editor from '@monaco-editor/react';
+import Editor, { OnMount } from '@monaco-editor/react';
+import type { editor as MonacoEditorType } from 'monaco-editor';
 import { useEffect, useRef, useState } from 'react';
 import * as Y from 'yjs';
 import { io, Socket } from 'socket.io-client';
@@ -10,7 +11,7 @@ interface Props {
 }
 
 export function CollabEditor({ roomId, language = 'javascript' }: Props) {
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<MonacoEditorType.IStandaloneCodeEditor | null>(null);
   const docRef = useRef<Y.Doc | null>(null);
   const socketRef = useRef<Socket | null>(null);
   const [connected, setConnected] = useState(false);
@@ -29,7 +30,6 @@ export function CollabEditor({ roomId, language = 'javascript' }: Props) {
       socket.emit('join-room', roomId);
     });
 
-    // Receive full document state on join
     socket.on('sync', (state: number[]) => {
       Y.applyUpdate(doc, new Uint8Array(state));
       if (editorRef.current) {
@@ -37,7 +37,6 @@ export function CollabEditor({ roomId, language = 'javascript' }: Props) {
       }
     });
 
-    // Receive incremental updates
     socket.on('doc-update', ({ update }: { update: number[] }) => {
       Y.applyUpdate(doc, new Uint8Array(update));
       if (editorRef.current) {
@@ -46,7 +45,9 @@ export function CollabEditor({ roomId, language = 'javascript' }: Props) {
         if (current !== newValue) {
           const position = editorRef.current.getPosition();
           editorRef.current.setValue(newValue);
-          editorRef.current.setPosition(position);
+          if (position) {
+            editorRef.current.setPosition(position); // null check fixes the error
+          }
         }
       }
     });
@@ -54,7 +55,6 @@ export function CollabEditor({ roomId, language = 'javascript' }: Props) {
     socket.on('user-joined', () => setUsers(u => u + 1));
     socket.on('disconnect', () => setConnected(false));
 
-    // Send local changes
     doc.on('update', (update: Uint8Array) => {
       socket.emit('doc-update', {
         roomId,
@@ -68,7 +68,7 @@ export function CollabEditor({ roomId, language = 'javascript' }: Props) {
     };
   }, [roomId]);
 
-  function handleEditorMount(editor: any) {
+  const handleEditorMount: OnMount = (editor) => {
     editorRef.current = editor;
 
     editor.onDidChangeModelContent(() => {
@@ -84,13 +84,14 @@ export function CollabEditor({ roomId, language = 'javascript' }: Props) {
         });
       }
     });
-  }
+  };
 
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-2 p-2 bg-gray-900 text-xs text-gray-400">
         <span className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400' : 'bg-red-400'}`} />
         <span>{connected ? `Connected — Room: ${roomId}` : 'Connecting...'}</span>
+        {users > 0 && <span>· {users + 1} users</span>}
       </div>
       <Editor
         height="70vh"

@@ -1,4 +1,4 @@
-import { auth } from 'clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
 import { db } from '@repo/db';
 import { NextResponse } from 'next/server';
 
@@ -13,8 +13,8 @@ export async function GET() {
         return new Response('User not found', { status: 404 });
     }
 
-    const thirtyDaysAgo = newDate(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const [events, codingSessions, mockInterview] = await Promise.all([
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const [events, codingSessions, mockInterviews] = await Promise.all([
     db.analyticsEvent.groupBy({
       by: ['eventType'],
       where: { userId: dbUser.id, createdAt: { gte: thirtyDaysAgo } },

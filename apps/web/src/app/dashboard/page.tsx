@@ -2,11 +2,29 @@
 import { useEffect, useState } from 'react';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, BarChart, Bar, Legend
+  ResponsiveContainer, BarChart, Bar
 } from 'recharts';
 
+interface CodingSession {
+  createdAt: string;
+  passed: boolean;
+  language: string;
+}
+
+interface MockInterviewResult {
+  score: number | null;
+  company: string;
+  createdAt: string;
+}
+
+interface AnalyticsData {
+  codingSessions: CodingSession[];
+  mockInterviews: MockInterviewResult[];
+  events: { eventType: string; _count: { id: number } }[];
+}
+
 export default function DashboardPage() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<AnalyticsData | null>(null);
 
   useEffect(() => {
     fetch('/api/analytics').then(r => r.json()).then(setData);
@@ -29,7 +47,7 @@ export default function DashboardPage() {
               </linearGradient>
             </defs>
             <XAxis dataKey="createdAt" tick={{ fontSize: 11 }}
-              tickFormatter={v => new Date(v).toLocaleDateString()} />
+              tickFormatter={(v: string) => new Date(v).toLocaleDateString()} />
             <YAxis tick={{ fontSize: 11 }} />
             <Tooltip />
             <Area type="monotone" dataKey="passed" stroke="#534AB7"

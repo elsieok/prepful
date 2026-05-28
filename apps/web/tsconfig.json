@@ -18,8 +18,12 @@
         "name": "next"
       }
     ],
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@ai-sdk/react": ["../../node_modules/@ai-sdk/react"],
+      "@ai-sdk/openai": ["../../node_modules/@ai-sdk/openai"],
+      "ai": ["../../node_modules/ai"]
     }
   },
   "include": [
