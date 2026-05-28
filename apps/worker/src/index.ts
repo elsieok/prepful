@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { db } from '@repo/db';
 import { withRetry } from 'lib';
 import { analyseResume } from './analysers/resume';
+import { startRealtimeServer } from './realtime/server.js';
 
 const pdf = require('pdf-parse');
 
@@ -122,3 +123,5 @@ worker.on('completed', (job) => {
     `[worker] Job completed ${job.id}`
   );
 });
+
+startRealtimeServer();
