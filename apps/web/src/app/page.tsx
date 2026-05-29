@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { SignIn, SignedOut, SignInButton } from '@clerk/nextjs';
+import { Show, SignInButton } from '@clerk/nextjs';
 
 const features = [
   {
@@ -47,7 +47,7 @@ export default function Home() {
       <nav className="flex items-center justify-between px-8 py-5 border-b border-white/10">
         <span className="text-xl font-bold tracking-tight">Prepful</span>
         <div className="flex items-center gap-4">
-          <SignedOut>
+          <Show when="signed-out">
             <SignInButton mode="modal">
               <button className="text-sm text-zinc-400 hover:text-white transition-colors">
                 Sign in
@@ -58,15 +58,15 @@ export default function Home() {
                 Get started free
               </button>
             </SignInButton>
-          </SignedOut>
-          <SignIn>
+          </Show>
+          <Show when="signed-in">
             <Link
               href="/dashboard"
               className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm px-4 py-2 rounded-lg transition-colors"
             >
               Go to dashboard →
             </Link>
-          </SignIn>
+          </Show>
         </div>
       </nav>
 
@@ -84,21 +84,21 @@ export default function Home() {
           everything you need to crack FAANG and beyond.
         </p>
         <div className="flex items-center justify-center gap-4">
-          <SignedOut>
+          <Show when="signed-out">
             <SignInButton mode="modal">
               <button className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-medium transition-colors">
                 Start preparing for free
               </button>
             </SignInButton>
-          </SignedOut>
-          <SignedIn>
+          </Show>
+          <Show when="signed-in">
             <Link
               href="/dashboard"
               className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-medium transition-colors"
             >
               Go to dashboard
             </Link>
-          </SignedIn>
+          </Show>
           <Link
             href="/interview"
             className="text-zinc-400 hover:text-white px-6 py-3 rounded-xl border border-white/10 hover:border-white/20 transition-colors text-sm"
