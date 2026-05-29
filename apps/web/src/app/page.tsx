@@ -1,65 +1,131 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { SignIn, SignedOut, SignInButton } from '@clerk/nextjs';
+
+const features = [
+  {
+    icon: '🤖',
+    title: 'AI Mock Interviews',
+    description: 'Practice with a real-time AI interviewer tailored to your target company and role.',
+    href: '/interview',
+  },
+  {
+    icon: '📄',
+    title: 'Resume Analyser',
+    description: 'Get an ATS score, missing keywords, and actionable impact suggestions instantly.',
+    href: '/resume',
+  },
+  {
+    icon: '💻',
+    title: 'Code Sandbox',
+    description: 'Solve problems in JavaScript or Python with live execution in a secure environment.',
+    href: '/code',
+  },
+  {
+    icon: '📅',
+    title: 'Study Plan',
+    description: 'AI-generated week-by-week prep plans with LeetCode targets and curated resources.',
+    href: '/study-plan',
+  },
+  {
+    icon: '👥',
+    title: 'Collab Editor',
+    description: 'Real-time collaborative coding with your peers — built on Yjs and WebSockets.',
+    href: '/collab',
+  },
+  {
+    icon: '📊',
+    title: 'Progress Dashboard',
+    description: 'Track your coding sessions, interview scores, and readiness over time.',
+    href: '/dashboard',
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen bg-zinc-950 text-white font-sans">
+      {/* Nav */}
+      <nav className="flex items-center justify-between px-8 py-5 border-b border-white/10">
+        <span className="text-xl font-bold tracking-tight">Prepful</span>
+        <div className="flex items-center gap-4">
+          <SignedOut>
+            <SignInButton mode="modal">
+              <button className="text-sm text-zinc-400 hover:text-white transition-colors">
+                Sign in
+              </button>
+            </SignInButton>
+            <SignInButton mode="modal">
+              <button className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm px-4 py-2 rounded-lg transition-colors">
+                Get started free
+              </button>
+            </SignInButton>
+          </SignedOut>
+          <SignIn>
+            <Link
+              href="/dashboard"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm px-4 py-2 rounded-lg transition-colors"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              Go to dashboard →
+            </Link>
+          </SignIn>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <section className="max-w-4xl mx-auto px-8 py-28 text-center">
+        <div className="inline-block bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs px-3 py-1 rounded-full mb-6 tracking-wide uppercase">
+          AI-powered interview prep
+        </div>
+        <h1 className="text-5xl sm:text-6xl font-bold leading-tight tracking-tight mb-6">
+          Land your dream{' '}
+          <span className="text-indigo-400">engineering role</span>
+        </h1>
+        <p className="text-lg text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+          Mock interviews, resume analysis, collaborative coding, and personalised study plans —
+          everything you need to crack FAANG and beyond.
+        </p>
+        <div className="flex items-center justify-center gap-4">
+          <SignedOut>
+            <SignInButton mode="modal">
+              <button className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-medium transition-colors">
+                Start preparing for free
+              </button>
+            </SignInButton>
+          </SignedOut>
+          <SignedIn>
+            <Link
+              href="/dashboard"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-medium transition-colors"
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+              Go to dashboard
+            </Link>
+          </SignedIn>
+          <Link
+            href="/interview"
+            className="text-zinc-400 hover:text-white px-6 py-3 rounded-xl border border-white/10 hover:border-white/20 transition-colors text-sm"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Try a mock interview →
+          </Link>
         </div>
-      </main>
+      </section>
+
+      {/* Features */}
+      <section className="max-w-5xl mx-auto px-8 pb-28">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {features.map((f) => (
+            <Link
+              key={f.title}
+              href={f.href}
+              className="group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-indigo-500/40 rounded-xl p-6 transition-all"
+            >
+              <div className="text-3xl mb-3">{f.icon}</div>
+              <h3 className="font-semibold mb-2 group-hover:text-indigo-300 transition-colors">
+                {f.title}
+              </h3>
+              <p className="text-sm text-zinc-400 leading-relaxed">{f.description}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

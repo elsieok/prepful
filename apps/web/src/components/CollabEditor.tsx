@@ -14,8 +14,10 @@ export function CollabEditor({ roomId, language = 'javascript' }: Props) {
   const editorRef = useRef<MonacoEditorType.IStandaloneCodeEditor | null>(null);
   const docRef = useRef<Y.Doc | null>(null);
   const socketRef = useRef<Socket | null>(null);
+  // Flag to suppress local onChange while applying remote updates
+  const applyingRemote = useRef(false);
   const [connected, setConnected] = useState(false);
-  const [users, setUsers] = useState(0);
+  const [users, setUsers] = useState(1);
 
   useEffect(() => {
     const doc = new Y.Doc();
@@ -30,36 +32,42 @@ export function CollabEditor({ roomId, language = 'javascript' }: Props) {
       socket.emit('join-room', roomId);
     });
 
+    // Full state sync when joining
     socket.on('sync', (state: number[]) => {
       Y.applyUpdate(doc, new Uint8Array(state));
       if (editorRef.current) {
+        applyingRemote.current = true;
+        const pos = editorRef.current.getPosition();
         editorRef.current.setValue(ytext.toString());
+        if (pos) editorRef.current.setPosition(pos);
+        applyingRemote.current = false;
       }
     });
 
+    // Incremental updates from other clients
     socket.on('doc-update', ({ update }: { update: number[] }) => {
+      const prevText = ytext.toString();
       Y.applyUpdate(doc, new Uint8Array(update));
-      if (editorRef.current) {
-        const current = editorRef.current.getValue();
-        const newValue = ytext.toString();
-        if (current !== newValue) {
-          const position = editorRef.current.getPosition();
-          editorRef.current.setValue(newValue);
-          if (position) {
-            editorRef.current.setPosition(position); // null check fixes the error
-          }
-        }
+      const nextText = ytext.toString();
+
+      if (editorRef.current && prevText !== nextText) {
+        applyingRemote.current = true;
+        const pos = editorRef.current.getPosition();
+        editorRef.current.setValue(nextText);
+        if (pos) editorRef.current.setPosition(pos);
+        applyingRemote.current = false;
       }
     });
 
-    socket.on('user-joined', () => setUsers(u => u + 1));
+    socket.on('user-joined', () => setUsers((u) => u + 1));
+    socket.on('user-left', () => setUsers((u) => Math.max(1, u - 1)));
     socket.on('disconnect', () => setConnected(false));
 
-    doc.on('update', (update: Uint8Array) => {
-      socket.emit('doc-update', {
-        roomId,
-        update: Array.from(update)
-      });
+    // Only broadcast updates that originated locally (not from remote apply)
+    doc.on('update', (update: Uint8Array, origin: unknown) => {
+      if (origin === 'local') {
+        socket.emit('doc-update', { roomId, update: Array.from(update) });
+      }
     });
 
     return () => {
@@ -72,16 +80,19 @@ export function CollabEditor({ roomId, language = 'javascript' }: Props) {
     editorRef.current = editor;
 
     editor.onDidChangeModelContent(() => {
+      // Skip if we're the ones applying a remote update
+      if (applyingRemote.current) return;
+
       const doc = docRef.current;
       if (!doc) return;
       const ytext = doc.getText('code');
-      const current = ytext.toString();
       const newValue = editor.getValue();
-      if (current !== newValue) {
+
+      if (ytext.toString() !== newValue) {
         doc.transact(() => {
           ytext.delete(0, ytext.length);
           ytext.insert(0, newValue);
-        });
+        }, 'local'); // tag as local so the update listener broadcasts it
       }
     });
   };
@@ -91,7 +102,7 @@ export function CollabEditor({ roomId, language = 'javascript' }: Props) {
       <div className="flex items-center gap-2 p-2 bg-gray-900 text-xs text-gray-400">
         <span className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400' : 'bg-red-400'}`} />
         <span>{connected ? `Connected — Room: ${roomId}` : 'Connecting...'}</span>
-        {users > 0 && <span>· {users + 1} users</span>}
+        <span>· {users} {users === 1 ? 'user' : 'users'}</span>
       </div>
       <Editor
         height="70vh"
