@@ -1,5 +1,6 @@
 'use client';
 import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
 import type { UIMessage } from 'ai';
 import { useState, type FormEvent, type ChangeEvent } from 'react';
 
@@ -9,7 +10,7 @@ const ROLES = ['Software Engineer', 'Frontend Engineer', 'Backend Engineer', 'Fu
 function getMessageText(message: UIMessage): string {
   return message.parts
     .filter(part => part.type === 'text')
-    .map(part => part.type === 'text' ? part.text : '')
+    .map(part => (part.type === 'text' ? part.text : ''))
     .join('');
 }
 
@@ -20,8 +21,10 @@ export function MockInterview() {
   const [inputValue, setInputValue] = useState('');
 
   const { messages, sendMessage, status } = useChat({
-    api: '/api/interview',
-    body: { company, role },
+    transport: new DefaultChatTransport({
+      api: '/api/interview',
+      body: { company, role },
+    }),
   });
 
   const isLoading = status === 'streaming' || status === 'submitted';
@@ -41,20 +44,28 @@ export function MockInterview() {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">Company</label>
-            <select value={company} onChange={e => setCompany(e.target.value)}
-              className="w-full border rounded-lg p-2">
+            <select
+              value={company}
+              onChange={e => setCompany(e.target.value)}
+              className="w-full border rounded-lg p-2"
+            >
               {COMPANIES.map(c => <option key={c}>{c}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Role</label>
-            <select value={role} onChange={e => setRole(e.target.value)}
-              className="w-full border rounded-lg p-2">
+            <select
+              value={role}
+              onChange={e => setRole(e.target.value)}
+              className="w-full border rounded-lg p-2"
+            >
               {ROLES.map(r => <option key={r}>{r}</option>)}
             </select>
           </div>
-          <button onClick={() => setStarted(true)}
-            className="w-full bg-brand-500 text-white py-3 rounded-lg font-medium hover:bg-brand-600">
+          <button
+            onClick={() => setStarted(true)}
+            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700"
+          >
             Start Interview
           </button>
         </div>
@@ -78,7 +89,7 @@ export function MockInterview() {
           <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-prose p-3 rounded-lg text-sm ${
               m.role === 'user'
-                ? 'bg-brand-500 text-white'
+                ? 'bg-indigo-600 text-white'
                 : 'bg-gray-100 text-gray-900'
             }`}>
               {getMessageText(m)}
@@ -95,8 +106,11 @@ export function MockInterview() {
           disabled={isLoading}
           className="flex-1 border rounded-lg p-2 text-sm disabled:opacity-50"
         />
-        <button type="submit" disabled={isLoading || !inputValue.trim()}
-          className="bg-brand-500 text-white px-4 py-2 rounded-lg text-sm disabled:opacity-50">
+        <button
+          type="submit"
+          disabled={isLoading || !inputValue.trim()}
+          className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm disabled:opacity-50"
+        >
           Send
         </button>
       </form>
