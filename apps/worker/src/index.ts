@@ -7,7 +7,7 @@ import { withRetry } from 'lib';
 import { analyseResume } from './analysers/resume';
 import { startRealtimeServer } from './realtime/server.js';
 
-const pdf = require('pdf-parse');
+const { default: pdfParse } = await import('pdf-parse');
 
 const EnvSchema = z.object({
   AWS_REGION: z.string(),
@@ -44,7 +44,7 @@ const worker = new Worker<ResumeJob>(
       if (!s3Response.Body) throw new Error('S3 response body is empty');
 
       const buffer = Buffer.from(await s3Response.Body.transformToByteArray());
-      const { text } = await pdf(buffer) as { text: string };
+      const { text } = await pdfParse(buffer) as { text: string };
 
       if (!text.trim()) throw new Error('No text extracted from PDF');
 
